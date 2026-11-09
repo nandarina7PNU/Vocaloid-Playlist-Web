@@ -1,0 +1,25 @@
+{
+  "name": "vocaloid-playlist-web",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @vocaloid/frontend",
+    "build": "npm run build --workspace @vocaloid/frontend",
+    "start": "npm run start --workspace @vocaloid/frontend",
+    "lint": "npm run lint --workspace @vocaloid/frontend",
+    "typecheck": "npm run typecheck --workspace @vocaloid/frontend",
+    "test:e2e": "playwright test",
+    "format": "prettier --write apps tests playwright.config.ts package.json docs/design/assets.md",
+    "format:check": "prettier --check apps tests playwright.config.ts package.json docs/design/assets.md"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "prettier": "^3.9.10"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

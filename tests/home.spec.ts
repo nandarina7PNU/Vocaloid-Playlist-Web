@@ -1,0 +1,107 @@
+import { test, expect, type Page } from '@playwright/test';
+
+async function openLibrary(page: Page, label: string) {
+  const menu = page.getByRole('button', { name: '메뉴 열기', exact: true });
+  if (await menu.isVisible()) await menu.click();
+  await page
+    .getByRole('navigation', { name: '내 라이브러리', exact: true })
+    .getByRole('button', { name: label, exact: true })
+    .click();
+}
+
+test.beforeEach(async ({ page }) => {
+  // Keep UI tests independent of third-party media availability.
+  await page.route('https://i.ytimg.com/**', (route) => route.abort());
+  await page.route('https://www.youtube-nocookie.com/**', (route) => route.abort());
+  await page.goto('/');
+});
+
+test('홈 화면과 반응형 레이아웃', async ({ page }) => {
+  await expect(page.getByRole('heading', { name: /당신의 취향을 더 잘 이해하는/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '지금, 당신을 위한 추천곡' })).toBeVisible();
+  await expect(page.locator('.song-card')).toHaveCount(6);
+  await expect(page.locator('.hero-image')).toBeVisible();
+  await expect
+    .poll(() =>
+      page.locator('.hero-image').evaluate((image: HTMLImageElement) => image.naturalWidth),
+    )
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
+  await expect(page.getByRole('img', { name: /샘플 취향 차트/ })).toBeVisible();
+});
+
+test('검색과 취향 필터, 검색 결과 없음', async ({ page }) => {
+  const search = page.getByRole('textbox', { name: '곡, 프로듀서, 보컬로이드 검색' });
+  await search.fill('DECO*27');
+  await expect(page.locator('.song-card')).toHaveCount(2);
+  await search.fill('찾을수없는곡');
+  await expect(page.getByRole('heading', { name: '일치하는 곡을 찾지 못했어요' })).toBeVisible();
+  await page.getByRole('button', { name: '필터 초기화', exact: true }).click();
+  await expect(page.locator('.song-card')).toHaveCount(6);
+  await page
+    .locator('.discovery-tags')
+    .getByRole('button', { name: '빠른 전개', exact: true })
+    .click();
+  await expect(page.locator('.song-card')).toHaveCount(3);
+  await expect(page.getByRole('heading', { name: '빠른 전개, 이런 곡은 어때요?' })).toBeVisible();
+});
+
+test('곡 저장이 새로고침 뒤에도 유지되고 라이브러리에 표시', async ({ page }) => {
+  await page.getByRole('button', { name: 'ヒバナ (Hibana) 저장', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('좋아요한 곡에 저장');
+  await page.reload();
+  await expect(
+    page.getByRole('button', { name: 'ヒバナ (Hibana) 저장 취소', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await openLibrary(page, '좋아요한 곡 1');
+  await expect(page.locator('.song-card')).toHaveCount(1);
+  await page.getByRole('button', { name: 'ヒバナ (Hibana) 저장 취소', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '좋아하는 곡을 모아 보세요' })).toBeVisible();
+});
+
+test('공식 영상 재생 창과 재생 기록', async ({ page }) => {
+  await page.getByRole('button', { name: 'ヒバナ (Hibana) 재생', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('iframe')).toHaveAttribute(
+    'src',
+    'https://www.youtube-nocookie.com/embed/hxSg2Ioz3LM?autoplay=1',
+  );
+  await expect(dialog.getByRole('link', { name: 'YouTube에서 보기' })).toHaveAttribute(
+    'href',
+    'https://www.youtube.com/watch?v=hxSg2Ioz3LM',
+  );
+  await page.keyboard.press('Escape');
+  await expect(dialog).not.toBeVisible();
+  await expect(dialog.locator('iframe')).toHaveCount(0);
+  await openLibrary(page, '최근 들은 곡');
+  await expect(page.locator('.song-card')).toHaveCount(1);
+});
+
+test('플레이리스트 생성 및 중복 이름 방지', async ({ page }) => {
+  const menu = page.getByRole('button', { name: '메뉴 열기', exact: true });
+  if (await menu.isVisible()) await menu.click();
+  await page.getByRole('button', { name: '플레이리스트 만들기', exact: true }).click();
+  await page.getByRole('textbox', { name: '플레이리스트 이름' }).fill('밤 산책');
+  await page.getByRole('button', { name: '만들기', exact: true }).click();
+  await expect(page.locator('.playlist-list')).toContainText('밤 산책');
+  await page.reload();
+  await openLibrary(page, '내 플레이리스트');
+  await expect(page.locator('.playlist-list')).toContainText('밤 산책');
+  await page.getByRole('button', { name: '새 플레이리스트', exact: true }).click();
+  await page.getByRole('textbox', { name: '플레이리스트 이름' }).fill('밤 산책');
+  await page.getByRole('button', { name: '만들기', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('같은 이름');
+  await expect(page.getByRole('dialog')).toBeVisible();
+});
+
+test('프로필과 공유 창에 샘플·공개 범위 안내', async ({ page }) => {
+  await page.getByRole('button', { name: '내 취향 한눈에 보기' }).click();
+  await expect(page.getByRole('dialog')).toContainText('현재는 예시예요');
+  await page.getByRole('button', { name: '닫기', exact: true }).click();
+  await page.locator('.share-panel').click();
+  await expect(page.getByRole('button', { name: '곡 목록 복사하기' })).toBeDisabled();
+  await expect(page.getByRole('dialog')).toContainText('재생 기록은 포함하지 않아요');
+});

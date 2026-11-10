@@ -73,6 +73,41 @@ test('홈 화면과 반응형 레이아웃', async ({ page }) => {
     true,
   );
   await expect(page.getByRole('img', { name: /샘플 취향 차트/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: '취향 프로필', exact: true })).toHaveAttribute(
+    'href',
+    '/mypage',
+  );
+});
+
+test('마이페이지 더미 데이터와 주요 카드 배치', async ({ page }) => {
+  await page.goto('/mypage');
+  await expect(page.getByRole('heading', { name: '마이페이지', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '취향 진단 결과' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '최근 들은 곡' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '최근 평가한 곡' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '내 플레이리스트' })).toBeVisible();
+  await expect(page.locator('.mypage-summary h2')).toContainText('미쿠_팬');
+  await expect(page.locator('.mypage-card-name')).toHaveText('미쿠_팬');
+  await expect(page.getByRole('img', { name: /취향 진단 결과/ })).toHaveCount(2);
+  await expect(page.getByRole('img', { name: /구성 69점/ }).first()).toBeVisible();
+  await page.getByRole('button', { name: '프로필 카드 전체 보기' }).click();
+  const profileCard = page.getByRole('dialog', { name: '미쿠_팬' });
+  await expect(profileCard).toBeVisible();
+  expect(await profileCard.evaluate((card) => card.scrollHeight <= card.clientHeight)).toBe(true);
+  await expect(profileCard).toContainText('VPW-7A39-MK01');
+  await expect(profileCard).toContainText('취향 키워드');
+  await expect(profileCard).toContainText('좋아하는 프로듀서');
+  await expect(profileCard).toContainText('최애곡');
+  await expect(profileCard).toContainText('플레이리스트');
+  await profileCard.getByRole('button', { name: '프로필 카드 닫기' }).click();
+  await expect(profileCard).not.toBeVisible();
+  await expect(page.getByRole('button', { name: '프로필 카드 공유하기' })).toBeVisible();
+  await expect(page.locator('.mypage-song-list article')).toHaveCount(3);
+  await expect(page.locator('.mypage-rating-list article')).toHaveCount(3);
+  await expect(page.locator('.mypage-playlist-list article')).toHaveCount(3);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
 });
 
 test('검색과 취향 필터, 검색 결과 없음', async ({ page }) => {

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import NextLink from 'next/link';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   ArrowRight,
@@ -374,16 +375,10 @@ export function MusicDashboard() {
                 {label === '추천' && <span className="nav-new">NEW</span>}
               </button>
             ))}
-            <button
-              className="nav-item"
-              onClick={() => {
-                setModal({ type: 'profile' });
-                setMobileMenu(false);
-              }}
-            >
+            <NextLink className="nav-item" href="/mypage" onClick={() => setMobileMenu(false)}>
               <UserRound />
               <span>취향 프로필</span>
-            </button>
+            </NextLink>
             <button
               className="nav-item"
               onClick={() => {

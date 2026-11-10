@@ -37,6 +37,13 @@ test('소개 페이지와 서비스 진입 경로', async ({ page }) => {
       .locator('.landing-page')
       .evaluate((element) => getComputedStyle(element).scrollSnapType),
   ).toContain('y mandatory');
+  const railSpacing = await page.evaluate(() => {
+    const rail = document.querySelector('.landing-page-dots')?.getBoundingClientRect();
+    const content = document.querySelector('.landing-hero-copy')?.getBoundingClientRect();
+    return rail && content ? { railRight: rail.right, contentLeft: content.left } : null;
+  });
+  expect(railSpacing).not.toBeNull();
+  expect(railSpacing!.railRight).toBeLessThan(railSpacing!.contentLeft);
   await expect(page.getByRole('link', { name: /취향 분석 시작하기/ })).toHaveAttribute(
     'href',
     '/home',

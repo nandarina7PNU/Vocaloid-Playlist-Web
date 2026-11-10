@@ -13,7 +13,43 @@ test.beforeEach(async ({ page }) => {
   // Keep UI tests independent of third-party media availability.
   await page.route('https://i.ytimg.com/**', (route) => route.abort());
   await page.route('https://www.youtube-nocookie.com/**', (route) => route.abort());
+  await page.goto('/home');
+});
+
+test('소개 페이지와 서비스 진입 경로', async ({ page }) => {
   await page.goto('/');
+  await expect(page).toHaveURL(/\/about$/);
+  await expect(
+    page.getByRole('heading', { name: /좋아한 이유를 이해하고.*Vocaloid 추천/ }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: '무엇이 다를까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '추천은 이렇게 이루어져요' })).toBeVisible();
+  await expect(page.getByText('콜드 스타트 대응', { exact: true })).toBeVisible();
+  await expect(page.getByText('숨은 명곡 발견', { exact: true })).toBeVisible();
+  await expect(page.locator('.landing-feature-card')).toHaveCount(6);
+  await expect(page.locator('.landing-step')).toHaveCount(6);
+  await expect(page.locator('.landing-screen')).toHaveCount(5);
+  await expect(
+    page.getByRole('navigation', { name: '소개 페이지 위치' }).getByRole('link'),
+  ).toHaveCount(5);
+  expect(
+    await page
+      .locator('.landing-page')
+      .evaluate((element) => getComputedStyle(element).scrollSnapType),
+  ).toContain('y mandatory');
+  await expect(page.getByRole('link', { name: /취향 분석 시작하기/ })).toHaveAttribute(
+    'href',
+    '/home',
+  );
+  await page.getByRole('link', { name: '4번째 화면: 추천 과정' }).click();
+  await expect(page).toHaveURL(/\/about#flow$/);
+  await expect(page.getByRole('link', { name: '4번째 화면: 추천 과정' })).toHaveAttribute(
+    'aria-current',
+    'step',
+  );
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
 });
 
 test('홈 화면과 반응형 레이아웃', async ({ page }) => {

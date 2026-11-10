@@ -1,5 +1,5 @@
-import { MusicDashboard } from '@/components/music-dashboard';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return <MusicDashboard />;
+  redirect('/about');
 }

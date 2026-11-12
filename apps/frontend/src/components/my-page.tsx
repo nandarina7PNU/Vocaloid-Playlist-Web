@@ -28,6 +28,7 @@ import {
   X,
 } from 'lucide-react';
 import { songs, type Song } from '@/lib/songs';
+import profileStyles from './profile-card.module.css';
 
 function MyPageLogo({ small = false }: { small?: boolean }) {
   return (
@@ -350,42 +351,33 @@ export function MyPage() {
             <section className="mypage-profile-panel" aria-labelledby="profile-card-title">
               <button
                 type="button"
-                className="mypage-profile-card"
+                className={profileStyles.preview}
                 onClick={() => setProfileOpen(true)}
                 aria-label="프로필 카드 전체 보기"
               >
-                <header>
-                  <span>
-                    <MyPageLogo small /> TASTE CARD
-                  </span>
-                  <span className="mypage-card-open">
-                    전체 보기 <ChevronRight />
-                  </span>
-                </header>
-                <div className="mypage-card-person">
-                  <span>
-                    <Image src="/images/miku-sunset.webp" alt="미쿠 팬" fill sizes="62px" />
-                  </span>
-                  <div>
+                <span className={profileStyles.previewSleeve}>
+                  <Image src="/images/miku-sunset.webp" alt="" fill sizes="160px" />
+                  <span className={profileStyles.previewMark}>VPW / 01</span>
+                  <span className={profileStyles.previewOwner}>
                     <strong className="mypage-card-name" id="profile-card-title">
                       미쿠_팬
                     </strong>
-                    <p>@miku_fan · {accountCode}</p>
-                  </div>
-                </div>
-                <p className="mypage-card-description">
-                  감정적인 보컬과 빠른 전개를 좋아하는 Vocaloid 리스너
-                </p>
-                <TasteChart compact />
-                <div className="mypage-card-tags">
-                  {tasteKeywords.slice(0, 3).map((keyword) => (
-                    <span key={keyword}>{keyword}</span>
-                  ))}
-                </div>
-                <footer>
-                  <span>Vocaloid Playlist Web</span>
-                  <strong>취향 일치도 86%</strong>
-                </footer>
+                    <span>@miku_fan</span>
+                  </span>
+                </span>
+                <span className={profileStyles.previewInfo}>
+                  <span className={profileStyles.eyebrow}>LISTENING IDENTITY</span>
+                  <strong>네온 드라이버</strong>
+                  <span className={profileStyles.previewChart}>
+                    <TasteChart compact />
+                  </span>
+                  <span className={profileStyles.previewKeywords}>
+                    전자음 · 빠른 BPM · 감정적 조교
+                  </span>
+                  <span className={profileStyles.previewCta}>
+                    전체 카드 보기 <ChevronRight size={14} />
+                  </span>
+                </span>
               </button>
               <button className="mypage-share-button" onClick={copyProfile}>
                 <Copy /> 프로필 카드 공유하기
@@ -510,121 +502,152 @@ export function MyPage() {
       </div>
       {profileOpen && (
         <div
-          className="mypage-profile-modal"
+          className={profileStyles.backdrop}
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setProfileOpen(false);
           }}
         >
           <section
-            className="mypage-profile-full-card"
+            className={profileStyles.card}
             role="dialog"
             aria-modal="true"
             aria-labelledby="profile-full-title"
           >
-            <header className="mypage-full-card-head">
-              <span>
-                <MyPageLogo small /> VOCALOID TASTE PROFILE
-              </span>
-              <div>
-                <button onClick={copyProfile} aria-label="프로필 링크 복사">
-                  <Link2 />
-                </button>
-                <button onClick={() => setProfileOpen(false)} aria-label="프로필 카드 닫기">
-                  <X />
-                </button>
+            <aside className={profileStyles.sleeve}>
+              <Image
+                className={profileStyles.sleeveArt}
+                src="/images/miku-sunset.webp"
+                alt=""
+                fill
+                sizes="(max-width: 620px) 420px, 320px"
+              />
+              <div className={profileStyles.sleeveBrand}>
+                <span>
+                  <AudioLines size={18} /> VOCALOID / LISTENER
+                </span>
+                <span>01</span>
               </div>
-            </header>
 
-            <div className="mypage-full-card-profile">
-              <span className="mypage-full-card-avatar">
-                <Image src="/images/miku-sunset.webp" alt="미쿠 팬" fill sizes="88px" />
-              </span>
-              <div>
-                <small>VOCALOID LISTENER</small>
+              <div className={profileStyles.owner}>
+                <span className={profileStyles.avatar}>
+                  <Image src="/images/miku-sunset.webp" alt="미쿠 팬 프로필" fill sizes="64px" />
+                </span>
                 <h2 id="profile-full-title">미쿠_팬</h2>
                 <p>@miku_fan</p>
-              </div>
-              <span className="mypage-account-code">
-                ACCOUNT CODE <strong>{accountCode}</strong>
-              </span>
-            </div>
-
-            <div className="mypage-full-card-showcase">
-              <section className="mypage-favorite-feature">
-                <span className="mypage-feature-label">
-                  <Heart fill="currentColor" /> ALL-TIME FAVORITE
-                </span>
-                <span className="mypage-favorite-cover">
-                  <Image
-                    src="/images/miku-sunset.webp"
-                    alt={`${favoriteSong.title} 커버`}
-                    fill
-                    sizes="220px"
-                  />
-                  <i>01</i>
-                </span>
-                <div>
-                  <small>최애곡</small>
-                  <h3>{favoriteSong.title}</h3>
-                  <blockquote>“부딪히는 마음까지도 선명한 빛이 되는 순간”</blockquote>
-                </div>
-              </section>
-
-              <div className="mypage-full-chart">
-                <TasteChart />
-                <div>
-                  <span>MY MUSIC IDENTITY</span>
-                  <strong>네온 드라이버</strong>
-                  <p>빠른 전개 속에서도 감정과 이야기를 놓치지 않는 취향</p>
-                </div>
+                <span className={profileStyles.accountCode}>{accountCode}</span>
               </div>
 
-              <aside className="mypage-keyword-rail">
-                <small>TASTE KEYWORDS</small>
-                <strong>취향 키워드</strong>
-                <div>
-                  {tasteKeywords.map((keyword, index) => (
-                    <span key={keyword}>
-                      <i>0{index + 1}</i>
-                      <em>#{keyword}</em>
-                    </span>
-                  ))}
+              <section className={profileStyles.favorite} aria-labelledby="profile-favorite-title">
+                <h3 id="profile-favorite-title">
+                  <span>ON REPEAT</span> 최애곡
+                </h3>
+                <div className={profileStyles.favoriteTrack}>
+                  <span className={profileStyles.cover}>
+                    <Image
+                      src="/images/miku-sunset.webp"
+                      alt={`${favoriteSong.title} 샘플 커버`}
+                      fill
+                      sizes="56px"
+                    />
+                  </span>
+                  <strong>{favoriteSong.title}</strong>
                 </div>
-              </aside>
-            </div>
+                <blockquote>
+                  “부딪히는 마음까지도
+                  <br />
+                  선명한 빛이 되는 순간”
+                </blockquote>
+              </section>
+              <span className={profileStyles.sleeveFooter}>A LITTLE RECORD OF MY SOUND.</span>
+            </aside>
 
-            <div className="mypage-full-card-meta">
-              <section className="mypage-producer-feature">
-                <small>좋아하는 프로듀서 · FAVORITE PRODUCERS</small>
-                <div className="mypage-producer-list">
-                  {favoriteProducers.map((producer, index) => (
-                    <span key={producer}>
-                      <i>{index + 1}</i> {producer}
-                    </span>
-                  ))}
+            <div className={profileStyles.content}>
+              <header className={profileStyles.header}>
+                <div>
+                  <span className={profileStyles.eyebrow}>YOUR SOUND, YOUR STORY.</span>
+                  <h3>
+                    네온 드라이버
+                    <span className={profileStyles.identityDot} aria-hidden="true" />
+                  </h3>
+                  <p>빠른 비트 속에서, 선명한 감정을 찾는 취향.</p>
+                </div>
+                <div className={profileStyles.actions}>
+                  <button onClick={copyProfile} aria-label="프로필 링크 복사">
+                    <Link2 />
+                  </button>
+                  <button onClick={() => setProfileOpen(false)} aria-label="프로필 카드 닫기">
+                    <X />
+                  </button>
+                </div>
+              </header>
+
+              <section className={profileStyles.analysis} aria-label="취향 분석">
+                <div className={profileStyles.chart}>
+                  <TasteChart />
+                </div>
+                <div className={profileStyles.keywords}>
+                  <h3 className={profileStyles.sectionTitle}>취향 키워드</h3>
+                  <ul>
+                    {tasteKeywords.map((keyword, index) => (
+                      <li key={keyword}>
+                        <span className={profileStyles.keywordIndex}>0{index + 1}</span>
+                        <strong>{keyword}</strong>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </section>
-              <section className="mypage-card-playlists">
-                <small>플레이리스트 · MY PLAYLISTS</small>
-                <div>
-                  {playlists.map((playlist, index) => (
-                    <span key={playlist}>
-                      <ListMusic />
-                      <strong>{playlist}</strong>
-                      <em>{index === 0 ? '12곡' : index === 1 ? '8곡' : '15곡'}</em>
-                    </span>
-                  ))}
-                </div>
-              </section>
-            </div>
 
-            <footer className="mypage-full-card-footer">
-              <span>좋아한 이유로 연결되는 음악 취향</span>
-              <strong>
-                <MyPageLogo small /> Vocaloid Playlist Web
-              </strong>
-            </footer>
+              <div className={profileStyles.library}>
+                <section
+                  className={profileStyles.producers}
+                  aria-labelledby="profile-producers-title"
+                >
+                  <h3 className={profileStyles.sectionTitle} id="profile-producers-title">
+                    좋아하는 프로듀서
+                  </h3>
+                  <ul>
+                    {favoriteProducers.map((producer, index) => (
+                      <li key={producer}>
+                        <span className={profileStyles.producerInitial}>
+                          {producer.slice(0, 1)}
+                        </span>
+                        <strong>{producer}</strong>
+                        <span className={profileStyles.rank}>0{index + 1}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+                <section
+                  className={profileStyles.playlists}
+                  aria-labelledby="profile-playlists-title"
+                >
+                  <h3 className={profileStyles.sectionTitle} id="profile-playlists-title">
+                    플레이리스트 <span>{playlists.length}</span>
+                  </h3>
+                  <ul>
+                    {playlists.map((playlist, index) => (
+                      <li key={playlist}>
+                        <span className={profileStyles.playlistIcon}>
+                          <ListMusic size={16} />
+                        </span>
+                        <strong>{playlist}</strong>
+                        <span className={profileStyles.trackCount}>
+                          {index === 0 ? '12' : index === 1 ? '8' : '15'}곡
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </div>
+              <footer className={profileStyles.footer}>
+                <span>취향으로 이어지는 음악.</span>
+                <strong>
+                  <AudioLines size={16} /> Vocaloid Playlist Web
+                </strong>
+              </footer>
+            </div>
           </section>
         </div>
       )}

@@ -110,6 +110,66 @@ test('마이페이지 더미 데이터와 주요 카드 배치', async ({ page }
   );
 });
 
+test('프로필 카드가 작은 화면에서도 잘리거나 겹치지 않음', async ({ page }) => {
+  await page.goto('/mypage');
+  await page.getByRole('button', { name: '프로필 카드 전체 보기' }).click();
+  const card = page.getByRole('dialog', { name: '미쿠_팬' });
+  await expect(card).toBeVisible();
+
+  for (const viewport of [
+    { width: 320, height: 568 },
+    { width: 390, height: 844 },
+    { width: 700, height: 600 },
+    { width: 900, height: 500 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect
+      .poll(
+        () =>
+          card.evaluate((element) => {
+            const cardBounds = element.getBoundingClientRect();
+            const regions = [...element.children].map((child) => child.getBoundingClientRect());
+            const overflowing = [...element.querySelectorAll('*')].some(
+              (child) =>
+                child instanceof HTMLElement &&
+                child.clientWidth > 0 &&
+                child.scrollWidth > child.clientWidth + 1,
+            );
+            return {
+              fitsViewport:
+                cardBounds.top >= 0 &&
+                cardBounds.left >= 0 &&
+                cardBounds.bottom <= innerHeight &&
+                cardBounds.right <= innerWidth,
+              noInternalScroll: element.scrollHeight <= element.clientHeight + 1,
+              regionsDoNotOverlap: regions.every((region, index) =>
+                regions
+                  .slice(index + 1)
+                  .every(
+                    (other) =>
+                      region.right <= other.left + 1 ||
+                      other.right <= region.left + 1 ||
+                      region.bottom <= other.top + 1 ||
+                      other.bottom <= region.top + 1,
+                  ),
+              ),
+              contentFits: !overflowing,
+            };
+          }),
+        { message: `${viewport.width}×${viewport.height}에서 프로필 카드 배치` },
+      )
+      .toEqual({
+        fitsViewport: true,
+        noInternalScroll: true,
+        regionsDoNotOverlap: true,
+        contentFits: true,
+      });
+  }
+
+  await page.keyboard.press('Escape');
+  await expect(card).not.toBeVisible();
+});
+
 test('검색과 취향 필터, 검색 결과 없음', async ({ page }) => {
   const search = page.getByRole('textbox', { name: '곡, 프로듀서, 보컬로이드 검색' });
   await search.fill('DECO*27');

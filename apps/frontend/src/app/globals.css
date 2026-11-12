@@ -4874,8 +4874,8 @@ p {
   grid-column: 3;
   grid-row: 1;
   padding: 13px;
-  background: #edf1e9;
-  border-color: #dce4d5;
+  background: #f7f2ff;
+  border-color: #e7dfff;
 }
 .mypage-share-button {
   width: 100%;
@@ -4885,8 +4885,8 @@ p {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  color: #3f7054;
-  border: 1px solid #cbdcc6;
+  color: #7952ca;
+  border: 1px solid #e7dfff;
   border-radius: 10px;
   background: #fff;
   font-size: 9px;
